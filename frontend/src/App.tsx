@@ -3,9 +3,22 @@ import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
 import ProtectedRoute from "./components/utils/protected-routes"
 import SignUp from "./pages/auth/SignUp"
+import { useEffect, useState } from "react"
 
 function App() {
-  const isAuthenticated = Boolean(localStorage.getItem("token"))
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("token")))
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAuthenticated(Boolean(localStorage.getItem("token")))
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [])
 
   return (
     <Routes>
