@@ -9,6 +9,7 @@ import (
 	"laundry-ledger/middleware"
 	"laundry-ledger/model"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -86,6 +87,9 @@ func main() {
 
 	// Create Gin router
 	r := gin.Default()
+
+	// Enable CORS for all origins
+	r.Use(cors.Default())
 
 	// Define routes for signup and login
 	r.POST("/signup", Signup)
