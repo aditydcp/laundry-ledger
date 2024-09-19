@@ -1,20 +1,18 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/obiQEBiUipE
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-// import Link from "next/link"
+import { Link } from "react-router-dom";
+import { WashingMachineIcon } from "@/components/utils/logo"
 
 export default function Login() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <div className="flex justify-center py-6">
+      <Card className="w-full max-w-md py-4 px-8">
+        <div className="flex flex-col items-center justify-center py-6 gap-3">
           <WashingMachineIcon className="h-12 w-12 text-primary" />
+          <h1 className="text-2xl font-bold">Laundry Ledger</h1>
+          <p className="text-muted-foreground">Login</p>
         </div>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -31,34 +29,11 @@ export default function Login() {
         </CardContent>
         <CardFooter className="text-center text-sm">
           Don&apos;t have an account?{" "}
-          {/* <Link href="#" className="font-medium underline underline-offset-4" prefetch={false}>
+          <Link to="/signup" className="font-medium underline underline-offset-4 pl-1">
             Sign up
-          </Link> */}
+          </Link>
         </CardFooter>
       </Card>
     </div>
-  )
-}
-
-function WashingMachineIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 6h3" />
-      <path d="M17 6h.01" />
-      <rect width="18" height="20" x="3" y="2" rx="2" />
-      <circle cx="12" cy="13" r="5" />
-      <path d="M12 18a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5" />
-    </svg>
   )
 }
