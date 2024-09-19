@@ -1,7 +1,8 @@
 import { Route, Routes } from "react-router-dom"
 import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
-import ProtectedRoute from "./components/utils/protected-routes"
+import ProtectedRoute from "./components/utils/routes-protected"
+import PublicRoute from "./components/utils/routes-public"
 import SignUp from "./pages/auth/SignUp"
 import { useEffect, useState } from "react"
 
@@ -29,8 +30,20 @@ function App() {
         </ProtectedRoute>
         }
       />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
+      <Route
+        path="/login"
+        element={<PublicRoute isAuthenticated={isAuthenticated}>
+          <Login />
+        </PublicRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={<PublicRoute isAuthenticated={isAuthenticated}>
+          <SignUp />
+        </PublicRoute>
+        }
+      />
     </Routes>
   )
 }
