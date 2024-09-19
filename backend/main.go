@@ -5,19 +5,19 @@ import (
 	"net/http"
 
 	"laundry-ledger/db"
-	"laundry-ledger/models"
+	"laundry-ledger/model"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Signup(c *gin.Context) {
-	var user models.User
+	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Save user to the database
+	// Save user to database
 	if err := db.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -31,20 +31,20 @@ func Login(c *gin.Context) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	var user models.User
+	var user model.User
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if the user exists
+	// Check if user exists
 	if err := db.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Email not registered"})
 		return
 	}
 
-	// Verify the password
+	// Verify password
 	if request.Password != user.Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong email or passsword"})
 		return
@@ -54,10 +54,10 @@ func Login(c *gin.Context) {
 }
 
 func main() {
-	// Initialize the database
+	// Initialize database
 	db.InitDB()
 
-	// Create a Gin router
+	// Create Gin router
 	r := gin.Default()
 
 	// Define routes for signup and login

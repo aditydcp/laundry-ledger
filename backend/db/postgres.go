@@ -2,11 +2,10 @@ package db
 
 import (
 	"fmt"
-	"laundry-ledger/models"
+	"laundry-ledger/model"
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -14,11 +13,7 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	var err error
 
 	// Get environment variables
 	host := os.Getenv("DB_HOST")
@@ -40,7 +35,7 @@ func InitDB() {
 	}
 
 	// Run migrations
-	err = DB.AutoMigrate(&models.User{})
+	err = DB.AutoMigrate(&model.User{})
 	if err != nil {
 		log.Fatal("Failed to run migrations: ", err)
 	}
