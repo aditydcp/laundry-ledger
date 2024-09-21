@@ -5,6 +5,10 @@ import ProtectedRoute from "./lib/routes-protected"
 import PublicRoute from "./lib/routes-public"
 import SignUp from "./pages/auth/SignUp"
 import { useEffect, useState } from "react"
+import Wardrobe from "./pages/home/Wardrobe"
+import HomeLayout from "./components/layouts/HomeLayout"
+import Washlist from "./pages/home/Washlist"
+import "@/App.css"
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("token")))
@@ -27,6 +31,24 @@ function App() {
         path="/"
         element={<ProtectedRoute isAuthenticated={isAuthenticated}>
           <Home />
+        </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/wardrobe"
+        element={<ProtectedRoute isAuthenticated={isAuthenticated}>
+          <HomeLayout>
+            <Wardrobe />
+          </HomeLayout>
+        </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/washlist"
+        element={<ProtectedRoute isAuthenticated={isAuthenticated}>
+          <HomeLayout>
+            <Washlist />
+          </HomeLayout>
         </ProtectedRoute>
         }
       />

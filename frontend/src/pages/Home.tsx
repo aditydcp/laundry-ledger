@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-export default function Component() {
+export default function Home() {
   const [items, setItems] = useState([
     { id: 1, name: "Wash Clothes", completed: false },
     { id: 2, name: "Dry Cleaning", completed: false },
