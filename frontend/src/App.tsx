@@ -1,8 +1,8 @@
 import { Route, Routes } from "react-router-dom"
 import Home from "./pages/Home"
 import Login from "./pages/auth/Login"
-import ProtectedRoute from "./components/utils/routes-protected"
-import PublicRoute from "./components/utils/routes-public"
+import ProtectedRoute from "./lib/routes-protected"
+import PublicRoute from "./lib/routes-public"
 import SignUp from "./pages/auth/SignUp"
 import { useEffect, useState } from "react"
 

@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Link, useNavigate } from "react-router-dom";
-import { WashingMachineIcon } from "@/components/utils/logo"
+import { WashingMachineIcon } from "lucide-react";
 import React, { useState } from "react";
 
 export default function Login() {
