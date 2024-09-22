@@ -4,33 +4,11 @@ import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { Switch } from "../ui/switch"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu"
-import { ClothingItem } from "@/types/ClothingItem"
 import { OrderForm } from "@/types/OrderForm"
+import useWardrobe from "@/hooks/useWardrobe"
 
 export default function OrderModal(props: any) {
-  const availableItems: ClothingItem[] = [
-    {
-      id: 1,
-      name: "Casual T-Shirt",
-      category: "Tops",
-    },
-    {
-      id: 2,
-      name: "Skinny Jeans",
-      category: "Bottoms",
-    },
-    {
-      id: 3,
-      name: "Leather Jacket",
-      category: "Others",
-    },
-    {
-      id: 4,
-      name: "Floral Dress",
-      category: "Others",
-    },
-  ]
-
+  const { wardrobe: availableItems } = useWardrobe()
   const { item: order, setIsModalOpen } = props
   const defaultFormState: OrderForm = {
     laundromartName: "",

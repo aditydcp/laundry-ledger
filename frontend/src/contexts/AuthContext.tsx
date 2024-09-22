@@ -1,11 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface AuthContextProps {
-  isAuthenticated: boolean;
-  login: (token: string) => void;
-  logout: () => void;
-}
+import { AuthContextProps } from "@/types/AuthContextProps";
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 

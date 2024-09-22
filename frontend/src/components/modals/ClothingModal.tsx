@@ -4,11 +4,12 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ClothingForm } from "@/types/ClothingForm";
+import { ClothingItem } from "@/types/ClothingItem";
 
 export default function ClothingModal(props: any) {
   const categories = ["Tops", "Bottoms", "Others"]
 
-  const { item, setIsModalOpen } = props
+  const { item, setWardrobe, setIsModalOpen } = props
   const defaultFormState: ClothingForm = { name: "", category: "Tops" }
   const [formState, setFormState] = useState(defaultFormState);
 
@@ -24,15 +25,60 @@ export default function ClothingModal(props: any) {
     setFormState({ ...formState, category: value })
   }
 
-  const handleSubmit = (e: any) => {
+  const editItem = async (item: ClothingItem) => {
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/clothings/${item.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(item)
+    })
+    return await response.json()
+  }
+
+  const createItem = async (item: ClothingForm) => {
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/clothings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(item)
+    })
+    return await response.json()
+  }
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     if (item) {
-      // Edit existing item logic
-      console.log("Editing item", formState);
+      let data = await editItem({ id: item.ID, ...formState })
+      if (data) {
+        setWardrobe((prevState: any) => {
+          const itemIndex = prevState.findIndex((i: any) => i.id === item.id);
+  
+          if (itemIndex !== -1) {
+            console.log(prevState[itemIndex])
+  
+            const updatedWardrobe = [...prevState]; // Create a copy of the wardrobe
+            updatedWardrobe[itemIndex] = { ...updatedWardrobe[itemIndex], ...formState }; // Replace the item at the found index with the new item
+  
+            console.log(updatedWardrobe[itemIndex])
+  
+            return updatedWardrobe;
+          }
+  
+          return prevState;
+        });
+      } else {
+        console.error("Error saving data")
+      }
     } else {
-      // Add new item logic
-      console.log("Adding new item", formState);
+      let data = await createItem(formState)
+      if (data)
+        setWardrobe((prevState: any) => [...prevState, formState]);
+      else console.error("Error saving data")
     }
 
     setIsModalOpen(false);
