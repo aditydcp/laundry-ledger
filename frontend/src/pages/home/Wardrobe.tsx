@@ -4,30 +4,10 @@ import TopsIcon from "@/assets/tops.svg"
 import { EditIcon, PlusIcon } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import ClothingModal from "@/components/modals/ClothingModal"
+import useWardrobe from "@/hooks/useWardrobe"
 
 export default function Wardrobe() {
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: "Casual T-Shirt",
-      category: "Tops",
-    },
-    {
-      id: 2,
-      name: "Skinny Jeans",
-      category: "Bottoms",
-    },
-    {
-      id: 3,
-      name: "Leather Jacket",
-      category: "Others",
-    },
-    {
-      id: 4,
-      name: "Floral Dress",
-      category: "Others",
-    },
-  ])
+  const { wardrobe: items, setWardrobe } = useWardrobe()
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null)
@@ -50,6 +30,7 @@ export default function Wardrobe() {
         </div>
         <div id="content">
           <div className="container px-4 py-6">
+            {items ? 
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
               {items.map((item) => {
                 const icon = TopsIcon // placeholder image
@@ -84,7 +65,7 @@ export default function Wardrobe() {
                   </Card>
                 )
               })}
-            </div>
+            </div> : "Nothing is in your wardrobe..." }
           </div>
 
           <Tooltip>
@@ -102,6 +83,7 @@ export default function Wardrobe() {
       {isModalOpen && (
         <ClothingModal
           item={selectedItem}
+          setWardrobe={setWardrobe}
           setIsModalOpen={setIsModalOpen}
         />
       )}
