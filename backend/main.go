@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"laundry-ledger/controller"
 	"laundry-ledger/db"
@@ -26,7 +27,14 @@ func main() {
 	r := gin.Default()
 
 	// Enable CORS for all origins
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Define routes for signup and login
 	r.POST("/signup", func(c *gin.Context) { controller.Signup(c, db.DB) })
