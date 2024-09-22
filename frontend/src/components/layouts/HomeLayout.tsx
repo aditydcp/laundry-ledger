@@ -1,5 +1,5 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/hooks/useAuth"
 import { ClipboardListIcon, LogOutIcon, ShirtIcon, WashingMachineIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 

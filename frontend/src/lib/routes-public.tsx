@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { RouteProps } from '@/types/RouteProps';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const PublicRoute: React.FC<RouteProps> = ({ children }) => {
     const { isAuthenticated } = useAuth();

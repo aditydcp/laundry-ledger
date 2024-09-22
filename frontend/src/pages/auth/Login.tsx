@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom";
 import { WashingMachineIcon } from "lucide-react";
 import React, { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login } = useAuth();
-  // const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +27,6 @@ export default function Login() {
       const data = await response.json();
       if (response.ok) {
         login(data.token)
-        // localStorage.setItem("token", data.token);
-        // navigate("/");
       } else {
         console.error("Login failed:", data.error);
         setError(data.error);
