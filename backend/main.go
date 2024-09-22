@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"laundry-ledger/controller"
 	"laundry-ledger/db"
@@ -26,7 +27,14 @@ func main() {
 	r := gin.Default()
 
 	// Enable CORS for all origins
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Define routes for signup and login
 	r.POST("/signup", func(c *gin.Context) { controller.Signup(c, db.DB) })
@@ -49,6 +57,8 @@ func main() {
 		protected.POST("/orders", func(c *gin.Context) { controller.CreateOrder(c, db.DB) })
 		protected.PUT("/orders/:id", func(c *gin.Context) { controller.UpdateOrder(c, db.DB) })
 		protected.DELETE("/orders/:id", func(c *gin.Context) { controller.DeleteOrder(c, db.DB) })
+
+		protected.GET("orders/:id/details", func(c *gin.Context) { controller.GetOrderDetailByOrderID(c, db.DB) })
 
 		protected.GET("/orderdetails", func(c *gin.Context) { controller.GetAllOrderDetails(c, db.DB) })
 		protected.GET("/orderdetails/:id", func(c *gin.Context) { controller.GetOrderDetailByID(c, db.DB) })

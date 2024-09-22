@@ -11,6 +11,12 @@ import (
 func GetAllOrders(c *gin.Context, db *gorm.DB) {
 	var orders []model.Order
 	db.Find(&orders)
+
+	if len(orders) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No orders found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, orders)
 }
 

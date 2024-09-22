@@ -11,6 +11,12 @@ import (
 func GetAllOrderDetails(c *gin.Context, db *gorm.DB) {
 	var orderDetails []model.OrderDetail
 	db.Preload("Clothing").Preload("Order").Find(&orderDetails)
+
+	if len(orderDetails) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No order detail found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, orderDetails)
 }
 
@@ -22,6 +28,27 @@ func GetOrderDetailByID(c *gin.Context, db *gorm.DB) {
 		return
 	}
 	c.JSON(http.StatusOK, orderDetail)
+}
+
+func GetOrderDetailByOrderID(c *gin.Context, db *gorm.DB) {
+	var orderDetails []model.OrderDetail
+	var order model.Order
+	orderID := c.Param("id")
+
+	// Check if the order exists
+	if err := db.First(&order, orderID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	// Fetch all OrderDetails where the order_id matches
+	if err := db.Preload("Clothing").Where("order_id = ?", orderID).Find(&orderDetails).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order details not found"})
+		return
+	}
+
+	// Return the list of OrderDetails
+	c.JSON(http.StatusOK, orderDetails)
 }
 
 func CreateOrderDetail(c *gin.Context, db *gorm.DB) {
