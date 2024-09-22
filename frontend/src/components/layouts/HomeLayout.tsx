@@ -46,7 +46,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
           })}
         </nav>
       </div>
-      <div className="p-6">{children}</div>
+      <div className="p-6 w-full">{children}</div>
     </div>
   )
 }
