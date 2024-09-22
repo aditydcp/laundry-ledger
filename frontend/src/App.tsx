@@ -1,5 +1,4 @@
-import { Route, Routes } from "react-router-dom"
-import Home from "./pages/Home"
+import { Navigate, Route, Routes } from "react-router-dom"
 import Login from "./pages/auth/Login"
 import ProtectedRoute from "./lib/routes-protected"
 import PublicRoute from "./lib/routes-public"
@@ -29,10 +28,7 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={<ProtectedRoute isAuthenticated={isAuthenticated}>
-          <Home />
-        </ProtectedRoute>
-        }
+        element={<Navigate to="/wardrobe" replace />}
       />
       <Route
         path="/wardrobe"
