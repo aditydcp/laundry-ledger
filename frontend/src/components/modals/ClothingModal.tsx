@@ -3,12 +3,13 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { ClothingForm } from "@/types/ClothingForm";
 
 export default function ClothingModal(props: any) {
   const categories = ["Tops", "Bottoms", "Others"]
 
   const { item, setIsModalOpen } = props
-  const defaultFormState = { name: "", category: "Tops" }
+  const defaultFormState: ClothingForm = { name: "", category: "Tops" }
   const [formState, setFormState] = useState(defaultFormState);
 
   useEffect(() => {
