@@ -32,7 +32,7 @@ export default function Wardrobe() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null)
 
-  const openForm = (item: { name: string, category: string } | null = null) => {
+  const openForm = (item: any = null) => {
     setSelectedItem(item)
     setIsModalOpen(true);
   }
@@ -55,7 +55,7 @@ export default function Wardrobe() {
                 const icon = TopsIcon // placeholder image
                 return (
                   <Card key={item.id} className="border-0 rounded-lg shadow-lg">
-                    <CardContent className="flex p-0 items-center justify-center w-200 h-200">
+                    <CardContent className="flex p-0 pt-2 items-center justify-center w-200 h-200">
                       <img
                         src={icon}
                         alt={item.name}
