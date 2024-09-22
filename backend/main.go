@@ -58,6 +58,8 @@ func main() {
 		protected.PUT("/orders/:id", func(c *gin.Context) { controller.UpdateOrder(c, db.DB) })
 		protected.DELETE("/orders/:id", func(c *gin.Context) { controller.DeleteOrder(c, db.DB) })
 
+		protected.GET("orders/:id/details", func(c *gin.Context) { controller.GetOrderDetailByOrderID(c, db.DB) })
+
 		protected.GET("/orderdetails", func(c *gin.Context) { controller.GetAllOrderDetails(c, db.DB) })
 		protected.GET("/orderdetails/:id", func(c *gin.Context) { controller.GetOrderDetailByID(c, db.DB) })
 		protected.POST("/orderdetails", func(c *gin.Context) { controller.CreateOrderDetail(c, db.DB) })
