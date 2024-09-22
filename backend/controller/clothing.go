@@ -11,6 +11,12 @@ import (
 func GetAllClothings(c *gin.Context, db *gorm.DB) {
 	var clothings []model.Clothing
 	db.Find(&clothings)
+
+	if len(clothings) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No clothings found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, clothings)
 }
 

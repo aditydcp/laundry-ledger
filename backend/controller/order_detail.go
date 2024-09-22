@@ -11,6 +11,12 @@ import (
 func GetAllOrderDetails(c *gin.Context, db *gorm.DB) {
 	var orderDetails []model.OrderDetail
 	db.Preload("Clothing").Preload("Order").Find(&orderDetails)
+
+	if len(orderDetails) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No order detail found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, orderDetails)
 }
 
