@@ -102,6 +102,8 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
 
 ## Daftar API Endpoints
 
+[API Documentations](https://documenter.getpostman.com/view/17672653/2sAXqtc279)
+
 | Method | Endpoint   | Deskripsi                                   | Data yang Diterima          | Data yang Dikirim   |
 |--------|------------|---------------------------------------------|-----------------------------|---------------------|
 | `POST` | `/signup`  | Mendaftarkan pengguna baru                  | `{ "email": "string", "name": "string", "password": "string" }` | `{ "message": "User created successfully" }` |
