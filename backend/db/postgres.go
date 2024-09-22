@@ -35,7 +35,7 @@ func InitDB() {
 	}
 
 	// Run migrations
-	err = DB.AutoMigrate(&model.User{})
+	err = DB.AutoMigrate(&model.User{}, &model.Clothing{}, &model.Order{}, &model.OrderDetail{})
 	if err != nil {
 		log.Fatal("Failed to run migrations: ", err)
 	}
