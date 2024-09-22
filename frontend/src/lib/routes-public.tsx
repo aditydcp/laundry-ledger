@@ -1,9 +1,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { RouteProps } from '../types/RouteProps';
+import { RouteProps } from '@/types/RouteProps';
+import { useAuth } from '@/contexts/AuthContext';
 
-const PublicRoute: React.FC<RouteProps> = ({ isAuthenticated, children }) => {
-    return isAuthenticated ? <Navigate to="/" /> : children
+const PublicRoute: React.FC<RouteProps> = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
 }
 
 export default PublicRoute;

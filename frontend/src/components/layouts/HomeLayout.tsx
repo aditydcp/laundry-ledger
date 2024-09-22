@@ -1,5 +1,6 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { ClipboardListIcon, ShirtIcon, WashingMachineIcon } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import { ClipboardListIcon, LogOutIcon, ShirtIcon, WashingMachineIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     //   path: "profile",
     // },
   ]
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+  }
 
   return (
     <div className="flex min-h-screen w-full">
@@ -44,6 +50,19 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
               </Tooltip>
             )
           })}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/login"
+                className="flex h-12 w-12 items-center justify-center rounded-lg text-accent-foreground transition-colors hover:bg-accent hover:text-foreground md:h-10 md:w-10"
+                onClick={handleLogout}
+              >
+                <LogOutIcon className="h-8 w-8" />
+                <span className="sr-only">Log Out</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Log Out</TooltipContent>
+          </Tooltip>
         </nav>
       </div>
       <div className="p-6 w-full">{children}</div>
