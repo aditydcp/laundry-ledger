@@ -35,6 +35,14 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
 - **Go** (v1.18 atau lebih baru) (untuk backend)
 - **PostgreSQL** (untuk database)
 
+### Setup Database
+
+1. Apabila Anda belum memiliki PostgreSQL, Anda dapat menginstalnya pada mesin lokal Anda melalui [PostgreSQL Download](https://www.postgresql.org/download/).
+
+2. Buat database kosong terlebih dahulu sebagai wadah untuk data aplikasi ini. Cukup membuat database baru dan kosong, karena aplikasi akan membuat tabel-tabel secara otomatis melalui migrasi. Untuk membuat database, dapat dilakukan dengan menggunakan CLI PostgreSQL, atau dengan aplikasi pendukung tambahan seperti [DBeaver](https://dbeaver.io/download/) atau [PgAdmin](https://www.pgadmin.org/download/).
+
+*Note: Catat beberapa kredensial penting seperti username database, passwordnya, dan nama database karena akan digunakan pada aplikasi backend*
+
 ### Instalasi Backend
 
 1. Masuk ke direktori backend:
@@ -49,6 +57,8 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
     - DB_PASSWORD=
     - DB_NAME=
     - JWT_SECRET=
+
+    *Note: JWT secret dapat diisi secara bebas*
 
 3. Install dependensi:
    ```bash
@@ -104,11 +114,15 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
 
 [API Documentations](https://documenter.getpostman.com/view/17672653/2sAXqtc279)
 
-| Method | Endpoint   | Deskripsi                                   | Data yang Diterima          | Data yang Dikirim   |
-|--------|------------|---------------------------------------------|-----------------------------|---------------------|
-| `POST` | `/signup`  | Mendaftarkan pengguna baru                  | `{ "email": "string", "name": "string", "password": "string" }` | `{ "message": "User created successfully" }` |
-| `POST` | `/login`   | Login ke sistem dan menerima token JWT       | `{ "email": "string", "password": "string" }`                    | `{ "message": "Login successful", "token": "JWT" }` |
-| `GET`  | `/user`    | Mendapatkan informasi pengguna yang login    | Token JWT (dalam header `Authorization`) | `{ "email": "string", "name": "string" }` |
+| Method | Endpoint              | Deskripsi                                             | Data yang Diterima                                 | Data yang Dikirim   |
+|--------|-----------------------|-------------------------------------------------------|---------------------------------------------------|---------------------|
+| `POST` | `/signup`             | Mendaftarkan pengguna baru                            | `{ "email": "string", "name": "string", "password": "string" }` | `{ "message": "User created successfully" }` |
+| `POST` | `/login`              | Login ke sistem dan menerima token JWT                | `{ "email": "string", "password": "string" }`                    | `{ "message": "Login successful", "token": "JWT" }` |
+| `GET`  | `/user`               | Mendapatkan informasi pengguna yang login             | Token JWT (dalam header `Authorization`)          | `{ "email": "string", "name": "string" }` |
+| `GET`  | `/api/clothings`      | Mendapatkan semua pakaian yang ada di wardrobe        | Token JWT (dalam header `Authorization`)          | List of clothing items |
+| `POST` | `/api/orders`         | Membuat pesanan laundry baru                          | `{ "name": "string", "items": "array of clothing ids"}` | Created order |
+| `PUT`  | `/api/orders/:id`     | Mengupdate informasi pesanan                          | `{ "is_complete": "boolean" }`                   | Updated order |
+| `GET`  | `/api/orders/:id/details` | Mendapatkan semua detail pesanan berdasarkan `order_id` | Token JWT (dalam header `Authorization`)          | List of order details |
 
 ---
 
@@ -116,12 +130,28 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
 
 ### Tabel `users`
 
-| Kolom     | Tipe Data | Deskripsi         |
-|-----------|-----------|-------------------|
-| `id`      | `UUID`    | Primary key       |
-| `email`   | `VARCHAR` | Email pengguna    |
-| `name`    | `VARCHAR` | Nama pengguna     |
-| `password`| `VARCHAR` | Password (hashed) |
+| Kolom      | Tipe Data | Deskripsi         |
+|------------|-----------|-------------------|
+| `id`       | `UUID`    | Primary key       |
+| `email`    | `VARCHAR` | Email pengguna    |
+| `name`     | `VARCHAR` | Nama pengguna     |
+| `password` | `VARCHAR` | Password          |
+
+### Tabel `orders`
+
+| Kolom      | Tipe Data | Deskripsi         |
+|------------|-----------|-------------------|
+| `id`       | `UUID`    | Primary key       |
+| `name`     | `VARCHAR` | Nama Laundromart  |
+| `is_complete` | `BOOLEAN` | Status pesanan |
+
+### Tabel `order_details`
+
+| Kolom         | Tipe Data | Deskripsi         |
+|---------------|-----------|-------------------|
+| `id`          | `UUID`    | Primary key       |
+| `order_id`    | `UUID`    | Foreign key ke tabel orders |
+| `clothing_id` | `UUID`    | Foreign key ke tabel clothings |
 
 ---
 
@@ -137,6 +167,16 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
    ![Screenshot Signup](/screenshots/signup.png)  
    Pengguna baru bisa mendaftarkan akun mereka di halaman ini.
 
+3. **Halaman Wardrobe**
+
+   ![Screenshot Wardrobe](/screenshots/wardrobe.png)  
+   Pengguna dapat mengelola pakaiannya di sini.
+
+4. **Halaman Washlist**
+
+   ![Screenshot Washlist](/screenshots/washlist.png)  
+   Pengguna dapat mengelola pesanan laundry-nya di sini.
+
 ---
 
 ## Flow Interaksi Frontend dengan Backend
@@ -151,5 +191,17 @@ Aplikasi **Laundry Ledger** dibuat untuk memudahkan pengguna dalam mengelola war
    - Frontend mengirimkan data login ke endpoint `/login`.
    - Backend memverifikasi data dan mengirimkan token JWT ke frontend.
    - Frontend menyimpan token JWT dan menggunakannya untuk akses endpoint lain yang membutuhkan autentikasi.
+
+3. **Wardrobe Fetch Flow**:
+   - Pengguna dapat melihat semua pakaian di wardrobe setelah login.
+   - Frontend melakukan request GET ke endpoint `/api/clothings` dan mengirim token JWT dalam header `Authorization`.
+   - Backend merespons dengan daftar pakaian di wardrobe.
+   - Flow ini juga digunakan dapat Edit/Add Order, dimana pengguna memilih pakaian yang akan dimasukkan ke dalam order.
+
+4. **Order and Order Detail Flow**:
+   - Untuk membuat pesanan laundry, pengguna mengisi nama laundromart dan memilih pakaian dari wardrobe.
+   - Frontend mengirim request POST ke endpoint `/api/orders` untuk membuat pesanan.
+   - Setelah pesanan dibuat, frontend mengirim POST requests untuk menambahkan `OrderDetail` berdasarkan pakaian yang dipilih.
+   - Untuk Edit Order, update akan dilakukan pada `Orders`, kemudian dicari semua `OrderDetail` yang bersangkutan dengan `Order` tersebut. Update akan dilakukan pada baris `OrderDetail` yang valid, kemudian menambahkan baris baru secukupnya, dan/atau menghapus baris yang sudah tidak digunakan lagi.
 
 ---
