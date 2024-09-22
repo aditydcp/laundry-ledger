@@ -1,45 +1,48 @@
-import { Route, Routes } from "react-router-dom"
-import Home from "./pages/Home"
+import { Navigate, Route, Routes } from "react-router-dom"
 import Login from "./pages/auth/Login"
-import ProtectedRoute from "./components/utils/routes-protected"
-import PublicRoute from "./components/utils/routes-public"
+import ProtectedRoute from "./lib/routes-protected"
+import PublicRoute from "./lib/routes-public"
 import SignUp from "./pages/auth/SignUp"
-import { useEffect, useState } from "react"
+import Wardrobe from "./pages/home/Wardrobe"
+import HomeLayout from "./components/layouts/HomeLayout"
+import Washlist from "./pages/home/Washlist"
+import "@/App.css"
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("token")))
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem("token")))
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-    }
-  }, [])
-
   return (
     <Routes>
       <Route
         path="/"
-        element={<ProtectedRoute isAuthenticated={isAuthenticated}>
-          <Home />
+        element={<Navigate to="/wardrobe" replace />}
+      />
+      <Route
+        path="/wardrobe"
+        element={<ProtectedRoute>
+          <HomeLayout>
+            <Wardrobe />
+          </HomeLayout>
+        </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/washlist"
+        element={<ProtectedRoute>
+          <HomeLayout>
+            <Washlist />
+          </HomeLayout>
         </ProtectedRoute>
         }
       />
       <Route
         path="/login"
-        element={<PublicRoute isAuthenticated={isAuthenticated}>
+        element={<PublicRoute>
           <Login />
         </PublicRoute>
         }
       />
       <Route
         path="/signup"
-        element={<PublicRoute isAuthenticated={isAuthenticated}>
+        element={<PublicRoute>
           <SignUp />
         </PublicRoute>
         }
