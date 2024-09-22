@@ -30,7 +30,7 @@ export default function Wardrobe() {
         </div>
         <div id="content">
           <div className="container px-4 py-6">
-            {items ? 
+            {items.length > 0 ? 
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6">
               {items.map((item) => {
                 const icon = TopsIcon // placeholder image
