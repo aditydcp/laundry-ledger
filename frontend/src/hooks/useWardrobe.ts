@@ -12,7 +12,7 @@ const useWardrobe = () => {
         const token = localStorage.getItem("token")
         const response = await fetch(`${baseUrl}/api/clothings`, {
           headers: {
-            'Authorization': `Bearer+${token}`
+            'Authorization': `Bearer ${token}`
           },
         });
         if (!response.ok) {

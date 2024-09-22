@@ -6,10 +6,11 @@ import { Switch } from "../ui/switch"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { OrderForm } from "@/types/OrderForm"
 import useWardrobe from "@/hooks/useWardrobe"
+import { ClothingItem } from "@/types/ClothingItem"
 
 export default function OrderModal(props: any) {
   const { wardrobe: availableItems } = useWardrobe()
-  const { item: order, setIsModalOpen } = props
+  const { item: order, setOrders, setIsModalOpen, editItem } = props
   const defaultFormState: OrderForm = {
     laundromartName: "",
     completed: false,
@@ -42,15 +43,62 @@ export default function OrderModal(props: any) {
     })
   }
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
+  const createItem = async (item: OrderForm) => {
+    let { laundromartName, ...data } = item
+    const newItem = { name: laundromartName, ...data}
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(newItem)
+    })
+    const orderResponse = await response.json()
+    if (!orderResponse) return orderResponse
 
+    newItem.items.forEach((clothing: any) => {
+      let orderDetail = { order_id: orderResponse.ID, clothing_id: clothing.ID }
+      fetch(`${import.meta.env.VITE_BASE_URL}/api/orderdetails`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(orderDetail)
+      }).then((response) => {
+        response.json().then((data) => {
+          if (!data) {
+            console.log("Error saving order details")
+            return data
+          }
+        })
+      })
+    })
+
+    return orderResponse
+  }
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    let { laundromartName, ...form } = formState
     if (order) {
-      // Edit existing item logic
-      console.log("Editing order", formState);
+      let newItem = {
+        id: order.ID,
+        name: laundromartName,
+        ...form
+      }
+      await editItem(newItem)
     } else {
-      // Add new item logic
-      console.log("Adding new order", formState);
+      let newItem = {
+        name: laundromartName,
+        ...form
+      }
+      console.log(newItem)
+      let data = await createItem(formState)
+      if (data)
+        setOrders((prevState: any) => [...prevState, {...newItem, is_complete: form.completed}]);
+      else console.error("Error saving data")
     }
 
     setIsModalOpen(false);
@@ -97,8 +145,8 @@ export default function OrderModal(props: any) {
               <DropdownMenuContent className="w-full" align="start">
                 {availableItems.map((item: any) => (
                   <DropdownMenuCheckboxItem
-                    key={item.id}
-                    checked={formState.items.map(item => item.id).includes(item.id)}
+                    key={item.ID}
+                    checked={formState.items.map(item => item.ID).includes(item.ID)} // ignore type error, this still works
                     onCheckedChange={() => handleItemToggle(item)}
                   >
                     {item.name}

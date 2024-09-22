@@ -1,101 +1,147 @@
 import OrderModal from "@/components/modals/OrderModal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { OrderItem } from "@/types/OrderItem"
 import { CheckCircleIcon, EditIcon, PlusIcon, XCircleIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function Washlist() {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      name: "Cinta Laundry",
-      completed: false,
-      items: [
-        {
-          id: 1,
-          name: "Kaos Putih"
-        },
-        {
-          id: 2,
-          name: "Celana Ijo"
+  const defaultOrders: OrderItem[] = []
+  const [orders, setOrders] = useState(defaultOrders)
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_BASE_URL
+        const token = localStorage.getItem("token")
+        const response = await fetch(`${baseUrl}/api/orders`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        });
+        if (!response.ok) {
+          throw new Error(response.statusText);
         }
-      ]
-    },
-    {
-      id: 2,
-      name: "Dry Cleaning Specialist",
-      completed: false,
-      items: [
-        {
-          id: 1,
-          name: "Tuxedo"
-        },
-        {
-          id: 2,
-          name: "Jas Jus"
+        const data = await response.json();
+
+        const joinResponse = await fetch(`${baseUrl}/api/orderdetails`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        })
+        if (!joinResponse.ok) {
+          throw new Error(joinResponse.statusText);
         }
-      ]
-    },
-    {
-      id: 3,
-      name: "Rewash",
-      completed: true,
-      items: [
-        {
-          id: 1,
-          name: "Sepatu Tinggi Putih Gum Ventela"
-        },
-        {
-          id: 2,
-          name: "Sepatu Kodachi Classic"
-        },
-        {
-          id: 3,
-          name: "Sepatu Running Ortuseight"
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: "Rewash",
-      completed: true,
-      items: [
-        {
-          id: 1,
-          name: "Sepatu Tinggi Putih Gum Ventela"
-        },
-        {
-          id: 2,
-          name: "Sepatu Kodachi Classic"
-        },
-        {
-          id: 3,
-          name: "Sepatu Running Ortuseight"
-        }
-      ]
-    },
-    {
-      id: 5,
-      name: "Rewash",
-      completed: true,
-      items: [
-        {
-          id: 1,
-          name: "Sepatu Tinggi Putih Gum Ventela"
-        },
-        {
-          id: 2,
-          name: "Sepatu Kodachi Classic"
-        },
-        {
-          id: 3,
-          name: "Sepatu Running Ortuseight"
-        }
-      ]
-    },
-  ])
+        const joinData = await joinResponse.json();
+
+        const orderData = data.map((orderItem: any) => {
+          let itemsData = joinData.filter((item: any) => item.order_id === orderItem.ID)
+          return ({
+            ...orderItem,
+            completed: orderItem.is_complete,
+            items: itemsData.map((item: any) => item.Clothing)
+          })
+        })
+        console.log(orderData)
+
+        setOrders(orderData);
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+      }
+    }
+    fetchOrders()
+  }, [])
+
+  const editItem = async (item: OrderItem) => {
+    let { completed, ...itemBody } = item
+    const body = { ...itemBody, is_complete: completed }
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/orders/${item.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(body)
+    })
+    const updatedOrder = await response.json();
+
+    if (!updatedOrder) {
+      console.error("Error updating order");
+      return;
+    }
+
+    // Fetch existing order details
+    const orderDetailsResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/orders/${item.id}/details`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+    });
+    const existingDetails = await orderDetailsResponse.json();
+
+    // Process the updated order details
+    const existingClothingIds = existingDetails.map((detail: any) => detail.clothing_id);
+    const newClothingIds = body.items.map((clothing: any) => clothing.ID);
+
+    // Update or create new order details
+    body.items.forEach(async (clothing: any) => {
+      const orderDetail = { order_id: updatedOrder.ID, clothing_id: clothing.ID };
+
+      if (existingClothingIds.includes(clothing.ID)) {
+        // Update existing OrderDetail if necessary
+        const updateResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/orderdetails/${clothing.ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(orderDetail),
+        });
+        await updateResponse.json();
+      } else {
+        // Create new OrderDetail
+        const createResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/orderdetails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(orderDetail),
+        });
+        await createResponse.json();
+      }
+    });
+
+    existingDetails.forEach(async (detail: any) => {
+      if (!newClothingIds.includes(detail.clothing_id)) {
+        await fetch(`${import.meta.env.VITE_BASE_URL}/api/orderdetails/${detail.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      }
+    });
+
+    // update records on Order Details
+
+    setOrders((prevState: any) => {
+      const itemIndex = prevState.findIndex((i: any) => i.ID === item.id);
+
+      if (itemIndex !== -1) {
+        console.log("previous", prevState[itemIndex])
+
+        const updatedOrders = [...prevState]; // Create a copy of the wardrobe
+        updatedOrders[itemIndex] = { ...updatedOrders[itemIndex], ...item }; // Replace the item at the found index with the new item
+
+        console.log(updatedOrders[itemIndex])
+
+        return updatedOrders;
+      }
+
+      return prevState;
+    });
+  }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null)
@@ -118,57 +164,66 @@ export default function Washlist() {
         </div>
         <div id="content">
           <div className="container mx-auto px-4 py-6">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
-              {orders.map((order) => (
-                <Card key={order.id} className="border-0 rounded-lg shadow-lg">
-                  <CardHeader className="flex flex-row items-center justify-between p-2">
-                    <div className="flex flex-col justify-center">
-                      <span className="text-xl font-bold">
-                        {order.name}
-                      </span>
-                      <span className="text-md">
-                        {order.completed ? "Completed" : "Incomplete"}
-                      </span>
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="p-2 mt-0"
-                          onClick={() => openForm()}
-                        >
-                          <EditIcon className="w-4 h-4" />
-                          <span className="sr-only">Edit Order</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">Edit</TooltipContent>
-                    </Tooltip>
-                  </CardHeader>
-                  <CardContent className="p-0 px-2">
-                    <div className="p-2 bg-muted rounded-lg">
-                      <ul className="ml-5 list-disc text-sm">
-                        {order.items.map(item => (
-                          <li key={`${order.id}-${item.id}`}>{item.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="grid gap-2 p-2 pt-3 pb-4">
-                    <div className="flex items-end justify-end w-full">
+            {orders.length > 0 ?
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
+                {orders.map((order) => (
+                  <Card key={order.id} className="border-0 rounded-lg shadow-lg">
+                    <CardHeader className="flex flex-row items-center justify-between p-2">
+                      <div className="flex flex-col justify-center">
+                        <span className="text-xl font-bold">
+                          {order.name}
+                        </span>
+                        <span className="text-md">
+                          {order.completed ? "Completed" : "Incomplete"}
+                        </span>
+                      </div>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline">
-                            {order.completed ? <XCircleIcon className="w-4 h-4" /> : <CheckCircleIcon className="w-4 h-4" />}
-                            <span className="sr-only">{order.completed ? "Mark as Incomplete" : "Mark as Completed"}</span>
+                          <Button
+                            variant="outline"
+                            className="p-2 mt-0"
+                            onClick={() => openForm(order)}
+                          >
+                            <EditIcon className="w-4 h-4" />
+                            <span className="sr-only">Edit Order</span>
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">{order.completed ? "Mark as Incomplete" : "Mark as Completed"}</TooltipContent>
+                        <TooltipContent side="top">Edit</TooltipContent>
                       </Tooltip>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent className="p-0 px-2">
+                      <div className="p-2 bg-muted rounded-lg">
+                        <ul className="ml-5 list-disc text-sm">
+                          {order.items.map(item => (
+                            <li key={`${order.id}-${item.id}`}>{item.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="grid gap-2 p-2 pt-3 pb-4">
+                      <div className="flex items-end justify-end w-full">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                let { ID, name, completed, items } = order // ignore type error, this still works
+                                const updatedOrder = { id: ID, name, completed: !completed, items }
+                                console.log("updatedOrder", updatedOrder)
+                                editItem(updatedOrder)
+                              }}
+                            >
+                              {order.completed ? <XCircleIcon className="w-4 h-4" /> : <CheckCircleIcon className="w-4 h-4" />}
+                              <span className="sr-only">{order.completed ? "Mark as Incomplete" : "Mark as Completed"}</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">{order.completed ? "Mark as Incomplete" : "Mark as Completed"}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div> : "No orders yet"}
 
             <Tooltip>
               <TooltipTrigger
@@ -186,7 +241,9 @@ export default function Washlist() {
       {isModalOpen && (
         <OrderModal
           item={selectedItem}
+          setOrders={setOrders}
           setIsModalOpen={setIsModalOpen}
+          editItem={editItem}
         />
       )}
     </>
