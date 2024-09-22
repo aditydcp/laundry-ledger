@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"laundry-ledger/db"
 	"laundry-ledger/helper"
 	"laundry-ledger/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func Signup(c *gin.Context) {
+func Signup(c *gin.Context, db *gorm.DB) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -17,7 +17,7 @@ func Signup(c *gin.Context) {
 	}
 
 	// Save user to database
-	if err := db.DB.Create(&user).Error; err != nil {
+	if err := db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -25,7 +25,7 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
 }
 
-func Login(c *gin.Context) {
+func Login(c *gin.Context, db *gorm.DB) {
 	var request struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -38,7 +38,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Check if user exists
-	if err := db.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
+	if err := db.Where("email = ?", request.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Email not registered"})
 		return
 	}
